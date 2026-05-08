@@ -23,7 +23,7 @@ public:
     strcpy(email, other.email);
   }
 
-  ~Person() {
+  virtual ~Person() {
     delete [] name;
     delete [] email;
   }
@@ -41,15 +41,9 @@ public:
               << "Email: " << email << '\n';
   }
 
-  // void send_mail(const char* message) const {
-  //   std::ofstream inbox(email, std::ios::app);
-  //   greet(inbox) << ": \n" << message << '\n';
-  //   inbox.close();
-  // }
-
   void send_mail(const char* message) const {
     std::ofstream inbox(email, std::ios::app);
-    inbox << "To: " << name << ": \n" << message << '\n';
+    greet(inbox) << ": \n" << message << '\n';
     inbox.close();
   }
 
@@ -60,21 +54,19 @@ public:
   }
 
 private:
-  // char *name, *email;
+  char *name, *email;
   unsigned age;
 
 protected:
-  char *name, *email;
-
   void swap(Person& other) {
     std::swap(name, other.name);
     std::swap(email, other.email);
     std::swap(age, other.age);
   }
 
-  // std::ostream& greet(std::ostream& os) const {
-  //   return os << "To: " << name;
-  // }
+  virtual std::ostream& greet(std::ostream& os) const {
+    return os << "To: " << name;
+  }
 };
 
 class Student : public Person {
@@ -114,12 +106,6 @@ public:
     std::cout << "Faculty number: " << fn << '\n';
   }
 
-  void send_mail(const char* message) const {
-    std::ofstream inbox(email, std::ios::app);
-    inbox << "To " << name << ", " << fn << ": \n" << message << '\n';
-    inbox.close();
-  }
-
 private:
   char *fn;
 
@@ -128,9 +114,9 @@ private:
     std::swap(fn, other.fn);
   }
 
-  // std::ostream& greet(std::ostream& os) const {
-  //   return Person::greet(os) << ", " << fn;
-  // }
+  std::ostream& greet(std::ostream& os) const final {
+    return Person::greet(os) << ", " << fn;
+  }
 };
 
 int main() {
@@ -141,15 +127,17 @@ int main() {
   p.print();
   p.view_inbox();
 
-  Student s("Marko", "marko@gmail.com", 19, "3MI0824534");
-  s.print();
-  s.send_mail("Zdr kp");
-  s.view_inbox();
+  Student* s = new Student("Marko", "marko@gmail.com", 19, "3MI0824534");
+  s->print();
+  s->send_mail("Zdr kp");
+  s->view_inbox();
 
-  Person ps = static_cast<Person>(s);
-  ps.print();
-  ps.send_mail("Zvunni mi");
-  ps.view_inbox();
+  Person* ps = static_cast<Person*>(s);
+  ps->print();
+  ps->send_mail("Zvunni mi");
+  ps->view_inbox();
+
+  delete ps;
 
   return 0;
 }
