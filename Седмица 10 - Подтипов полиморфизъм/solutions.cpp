@@ -20,6 +20,10 @@ public:
     delete [] name;
   }
 
+  virtual Character* clone() const {
+    return new Character(*this);
+  }
+
   Character& operator=(const Character& other) {
     Character copy(other);
     swap(copy);
@@ -83,6 +87,10 @@ public:
     Character::heal(points * 1.05);
   }
 
+  Knight* clone() const final {
+    return new Knight(*this);
+  }
+
 private:
   const char* type() const final {
     return "Knight";
@@ -96,6 +104,10 @@ public:
 
   void take_damage(double points) final {
     Character::take_damage(points * 1.15);
+  }
+
+  Archer* clone() const final {
+    return new Archer(*this);
   }
 
 private:
@@ -116,10 +128,13 @@ public:
       size(other.size),
       capacity(other.capacity) {
     for (std::size_t i = 0; i < size; ++i) {
-      characters[i] = other.characters[i];
+      characters[i] = other.characters[i]->clone();
     }
   }
   ~Game() {
+    for (std::size_t i = 0; i < size; ++i) {
+      delete characters[i];
+    }
     delete [] characters;
   }
   Game& operator=(const Game& other) {
@@ -129,12 +144,12 @@ public:
     return *this;
   }
 
-  void add(Character* character) {
+  void add(const Character& character) {
     if (size == capacity) {
       resize();
     }
 
-    characters[size++] = character;
+    characters[size++] = character.clone();
   }
 
   void print() const {
@@ -210,9 +225,9 @@ int main() {
   Archer a("Legolas", 50, 80);
 
   Game game;
-  game.add(&c);
-  game.add(&k);
-  game.add(&a);
+  game.add(c);
+  game.add(k);
+  game.add(a);
 
   game.heal(20);
   
