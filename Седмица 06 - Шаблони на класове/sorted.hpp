@@ -15,6 +15,8 @@ public:
   Sorted(const Sorted& other);
   ~Sorted();
   Sorted<T> operator=(const Sorted& other);
+  Sorted(Sorted<T>&& other);
+  Sorted<T>& operator=(Sorted<T>&& other);
 
   Sorted<T>& add(const T& element);
   const T& operator[](std::size_t index) const;
@@ -162,6 +164,21 @@ void Sorted<T>::shift(std::size_t index) {
   for (std::size_t i = index + 1; i < size; ++i) {
     std::swap(data[i - 1], data[i]);
   }
+}
+
+
+template <typename T>
+Sorted<T>::Sorted(Sorted<T>&& other) 
+  : data(std::exchange(other.data, nullptr)),
+    size(std::move(other.size)),
+    capacity(std::move(other.capacity)) {}
+
+template <typename T>
+Sorted<T>& Sorted<T>::operator=(Sorted<T>&& other) {
+  Sorted<T> copy(std::move(other));
+  swap(copy);
+
+  return *this;
 }
 
 #endif
